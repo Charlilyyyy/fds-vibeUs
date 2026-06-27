@@ -1,0 +1,102 @@
+TuneFlow — 13-Phase Redo Roadmap (Idea → Documentation)
+=========================================================
+
+Phase 1: Idea & Vision
+----------------------
+- Define the problem: a Spotify-inspired music streaming backend
+- Write the project vision, target users, and core value proposition
+- List must-have vs nice-to-have features (auth, profiles, music catalog, playlists, streaming)
+- Decide learning goals (microservices, Spring Boot, Kafka, MinIO, etc.)
+
+Phase 2: Requirements & Scope
+-----------------------------
+- Gather functional requirements (register, login, manage artists/albums/tracks, upload media)
+- Define non-functional requirements (security, scalability, stateless auth, API versioning)
+- Write user stories and acceptance criteria
+- Lock MVP scope: Gateway, Auth, User, Music services + infrastructure
+
+Phase 3: Architecture & Tech Stack
+------------------------------------
+- Choose architecture: microservices with API gateway
+- Select stack: Java 21, Spring Boot 3, PostgreSQL, Redis, MinIO, Kafka, Docker
+- Draw service boundaries and data ownership (auth DB, user DB, music DB)
+- Define communication patterns: REST for sync, Kafka for async events
+- Plan ports, package structure, and naming conventions
+
+Phase 4: Project Setup & Repository Structure
+-----------------------------------------------
+- Initialize repo and folder layout (gateway-service, auth-service, user-service, music-service, Infrastructure)
+- Bootstrap each Spring Boot service with Maven, Lombok, and shared conventions
+- Add .gitignore, LICENSE, and base application.yml per service
+- Set up common patterns: BaseEntity, ApiResponse, GlobalExceptionHandler
+
+Phase 5: Infrastructure & Local Dev Environment
+-------------------------------------------------
+- Create docker-compose.yml (PostgreSQL, Redis, MinIO, Kafka, Kafka UI)
+- Configure separate databases per service (tuneflow_auth_db, tuneflow_user_db, tuneflow_music_db)
+- Verify containers start and services can connect locally
+- Document ports: Gateway 8081, Auth 8082, User 8083, Music 8084
+
+Phase 6: Auth Service
+---------------------
+- Implement user registration and login
+- Generate and validate JWT tokens (access token, roles/claims)
+- Configure Spring Security (stateless sessions, password encoding)
+- Expose auth APIs and internal token-validation endpoints
+- Write unit/integration tests for auth flows
+
+Phase 7: User Service
+---------------------
+- Design User entity and JPA repository
+- Build profile CRUD: create (internal), get, update
+- Implement UserContext / security for authenticated requests
+- Publish UserRegisteredEvent to Kafka on profile creation
+- Add Feign/internal API for auth-service → user-service communication
+
+Phase 8: Music Service — Catalog & Metadata
+---------------------------------------------
+- Model domain: Artist, Album, Track, Genre (entities, enums, relationships)
+- Implement repositories and service layer for each resource
+- Build REST controllers: create, read, update, delete, list with pagination
+- Add validation, duplicate checks, and consistent error responses
+- Seed or manually test catalog APIs
+
+Phase 9: Music Service — Media Storage (MinIO)
+----------------------------------------------
+- Integrate MinIO client and bucket configuration
+- Implement FileStorageService for artist images, album covers, track assets
+- Add multipart upload endpoints and return file URLs in responses
+- Handle storage errors and file type/size validation
+- Test end-to-end: upload file → store metadata → retrieve via API
+
+Phase 10: API Gateway & Cross-Service Security
+----------------------------------------------
+- Set up Spring Cloud Gateway routes to Auth, User, and Music services
+- Add JWT filter: validate token at gateway before forwarding requests
+- Configure public vs protected routes (/auth/register, /auth/login vs rest)
+- Enable CORS, request logging, and consistent error forwarding
+- Smoke-test all services through gateway on port 8081
+
+Phase 11: Event-Driven Communication (Kafka)
+--------------------------------------------
+- Define event contracts (e.g. UserRegisteredEvent)
+- Configure Kafka producers in auth/user services
+- Add consumers where needed (notifications, cache invalidation, future features)
+- Verify events flow end-to-end via Kafka UI
+- Plan async use cases: playlist sync, search indexing, analytics
+
+Phase 12: Testing, Hardening & Future Features
+-----------------------------------------------
+- Add integration tests per service; test gateway + auth + downstream flows
+- Introduce Redis caching for hot reads (optional in MVP)
+- Scaffold planned services: playlist-service, search-service, streaming-service
+- Review security (input validation, rate limiting, secrets in env vars)
+- Prepare for CI/CD: build scripts, Docker images, health checks
+
+Phase 13: Documentation & Project Wrap-Up
+-----------------------------------------
+- Write README: overview, architecture diagram, tech stack, setup steps
+- Document API endpoints (Swagger/OpenAPI per service or aggregated)
+- Add runbooks: how to start infra, run services, troubleshoot common issues
+- Record roadmap (Phase 2–4): playlists, search, streaming, K8s, observability
+- Capture lessons learned and architecture decisions (ADR-style notes)
