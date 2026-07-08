@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: music-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/vibeus_music_db
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+server:
+  port: 8084
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+minio:
+  endpoint: http://localhost:9000
+  public-url: http://localhost:9000
+  access-key: admin
+  secret-key: admin123
+  buckets:
+    artists: vibeus-artists
+    albums: vibeus-albums
+    tracks: vibeus-tracks
+
+# Catalog APIs and FileStorageService will be added next.
