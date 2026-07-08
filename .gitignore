@@ -1,0 +1,75 @@
+# ===========================
+# IntelliJ IDEA / VS Code
+# ===========================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.vscode/
+*.code-workspace
+
+# ===========================
+# Maven
+# ===========================
+target/
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# ===========================
+# Spring Boot
+# ===========================
+application-prod.properties
+application-prod.yml
+
+# ===========================
+# Logs
+# ===========================
+logs/
+*.log
+*.log.*
+
+# ===========================
+# Java
+# ===========================
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# ===========================
+# OS
+# ===========================
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# ===========================
+# Docker
+# ===========================
+docker-compose.override.yml
+
+# ===========================
+# Misc
+# ===========================
+HELP.md
+*.swp
+*~
