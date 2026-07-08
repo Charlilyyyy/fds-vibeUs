@@ -30,6 +30,5 @@ jwt:
   # Access token lifetime in milliseconds (default 1 hour).
   access-token-expiration: ${JWT_EXPIRATION_MS:3600000}
 
-# USER_SERVICE_URL will be used by Feign when register/login wiring is added.
-# user-service:
-#   url: ${USER_SERVICE_URL:http://localhost:8083}
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost:8083}
