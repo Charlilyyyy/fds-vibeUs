@@ -4,8 +4,10 @@ import com.vibeus.auth.client.UserServiceClient;
 import com.vibeus.auth.dto.request.CreateUserProfileRequest;
 import com.vibeus.auth.dto.request.LoginRequest;
 import com.vibeus.auth.dto.request.RegisterRequest;
+import com.vibeus.auth.dto.request.ValidateTokenRequest;
 import com.vibeus.auth.dto.response.AuthenticationResponse;
 import com.vibeus.auth.dto.response.RegisterResponse;
+import com.vibeus.auth.dto.response.TokenValidationResponse;
 import com.vibeus.auth.entity.User;
 import com.vibeus.auth.exception.DuplicateResourceException;
 import com.vibeus.auth.exception.UnauthorizedException;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -87,6 +91,36 @@ public class AuthServiceImpl implements AuthService {
                 "Bearer",
                 jwtService.extractExpiration(accessToken),
                 user.getId()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TokenValidationResponse validateToken(ValidateTokenRequest request) {
+        String token = request.token();
+
+        if (!jwtService.isTokenValid(token)) {
+            return TokenValidationResponse.invalid();
+        }
+
+        UUID userId;
+        try {
+            userId = UUID.fromString(jwtService.extractSubject(token));
+        } catch (IllegalArgumentException ex) {
+            return TokenValidationResponse.invalid();
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null || !user.isEnabled()) {
+            return TokenValidationResponse.invalid();
+        }
+
+        return TokenValidationResponse.valid(
+                user.getId(),
+                jwtService.extractEmail(token),
+                jwtService.extractUsername(token),
+                jwtService.extractRoles(token),
+                jwtService.extractExpiration(token)
         );
     }
 }
