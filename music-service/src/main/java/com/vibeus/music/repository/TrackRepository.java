@@ -16,6 +16,10 @@ public interface TrackRepository extends JpaRepository<Track, UUID> {
 
     Page<Track> findAllByActiveTrue(Pageable pageable);
 
+    boolean existsByTitleIgnoreCaseAndActiveTrue(String title);
+
+    Optional<Track> findByTitleIgnoreCaseAndActiveTrue(String title);
+
     Page<Track> findByAlbumIdAndActiveTrue(UUID albumId, Pageable pageable);
 
     Page<Track> findByArtistsIdAndActiveTrue(UUID artistId, Pageable pageable);
