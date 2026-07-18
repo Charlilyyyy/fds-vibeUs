@@ -4,14 +4,17 @@ import com.vibeus.music.dto.request.CreateArtistRequest;
 import com.vibeus.music.dto.request.UpdateArtistRequest;
 import com.vibeus.music.dto.response.ArtistResponse;
 import com.vibeus.music.entity.Artist;
+import com.vibeus.music.dto.response.FileUploadResponse;
 import com.vibeus.music.exception.DuplicateResourceException;
 import com.vibeus.music.exception.ResourceNotFoundException;
 import com.vibeus.music.repository.ArtistRepository;
+import com.vibeus.music.service.FileStorageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +31,9 @@ class ArtistServiceImplTest {
 
     @Mock
     private ArtistRepository artistRepository;
+
+    @Mock
+    private FileStorageService fileStorageService;
 
     @InjectMocks
     private ArtistServiceImpl artistService;
@@ -93,5 +99,21 @@ class ArtistServiceImplTest {
 
         assertThat(artist.isActive()).isFalse();
         verify(artistRepository).save(artist);
+    }
+
+    @Test
+    void uploadArtistImage_shouldStoreUrlAndDeleteOld() {
+        UUID id = UUID.randomUUID();
+        Artist artist = Artist.builder().id(id).name("Miles").imageUrl("old-url").active(true).build();
+        when(artistRepository.findByIdAndActiveTrue(id)).thenReturn(Optional.of(artist));
+        when(fileStorageService.uploadArtistImage(any()))
+                .thenReturn(new FileUploadResponse("new.png", "new-url"));
+        when(artistRepository.save(any(Artist.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ArtistResponse response = artistService.uploadArtistImage(
+                id, new MockMultipartFile("file", "new.png", "image/png", new byte[]{1}));
+
+        assertThat(response.imageUrl()).isEqualTo("new-url");
+        verify(fileStorageService).deleteFile("old-url");
     }
 }
