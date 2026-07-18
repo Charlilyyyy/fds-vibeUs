@@ -14,3 +14,11 @@ management:
 jwt:
   # Must match the auth-service secret exactly (min 32 characters for HS256).
   secret: ${JWT_SECRET:vibeus-local-dev-jwt-secret-change-me-32chars}
+
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8082}
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8083}
+  music-service:
+    url: ${MUSIC_SERVICE_URL:http://localhost:8084}
