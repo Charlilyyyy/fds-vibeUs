@@ -16,10 +16,12 @@ spring:
         format_sql: true
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: true
 
 server:
   port: 8083
@@ -29,5 +31,3 @@ management:
     web:
       exposure:
         include: health,info
-
-# Profile APIs, UserContext, and UserRegisteredEvent producer will be added next.
