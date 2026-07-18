@@ -3,6 +3,7 @@ package com.vibeus.music.service.impl;
 import com.vibeus.music.dto.request.CreateAlbumRequest;
 import com.vibeus.music.dto.request.UpdateAlbumRequest;
 import com.vibeus.music.dto.response.AlbumResponse;
+import com.vibeus.music.dto.response.FileUploadResponse;
 import com.vibeus.music.dto.response.PageResponse;
 import com.vibeus.music.entity.Album;
 import com.vibeus.music.entity.Artist;
@@ -11,10 +12,12 @@ import com.vibeus.music.exception.ResourceNotFoundException;
 import com.vibeus.music.repository.AlbumRepository;
 import com.vibeus.music.repository.ArtistRepository;
 import com.vibeus.music.service.AlbumService;
+import com.vibeus.music.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -24,6 +27,7 @@ public class AlbumServiceImpl implements AlbumService {
 
     private final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     @Transactional
@@ -126,6 +130,21 @@ public class AlbumServiceImpl implements AlbumService {
         Album album = getActiveAlbum(albumId);
         album.setActive(false);
         albumRepository.save(album);
+    }
+
+    @Override
+    @Transactional
+    public AlbumResponse uploadAlbumCover(UUID albumId, MultipartFile file) {
+        Album album = getActiveAlbum(albumId);
+
+        String oldCoverUrl = album.getCoverImageUrl();
+        FileUploadResponse upload = fileStorageService.uploadAlbumCover(file);
+        album.setCoverImageUrl(upload.fileUrl());
+
+        Album saved = albumRepository.save(album);
+        fileStorageService.deleteFile(oldCoverUrl);
+
+        return mapToResponse(saved);
     }
 
     private Artist getActiveArtist(UUID artistId) {

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -82,5 +83,16 @@ public class AlbumController {
         albumService.deleteAlbum(albumId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{albumId}/cover")
+    public ResponseEntity<ApiResponse<AlbumResponse>> uploadAlbumCover(
+            @PathVariable UUID albumId,
+            @RequestParam("file") MultipartFile file) {
+
+        AlbumResponse response = albumService.uploadAlbumCover(albumId, file);
+
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(),
+                "Album cover uploaded successfully", response));
     }
 }

@@ -3,16 +3,19 @@ package com.vibeus.music.service.impl;
 import com.vibeus.music.dto.request.CreateArtistRequest;
 import com.vibeus.music.dto.request.UpdateArtistRequest;
 import com.vibeus.music.dto.response.ArtistResponse;
+import com.vibeus.music.dto.response.FileUploadResponse;
 import com.vibeus.music.dto.response.PageResponse;
 import com.vibeus.music.entity.Artist;
 import com.vibeus.music.exception.DuplicateResourceException;
 import com.vibeus.music.exception.ResourceNotFoundException;
 import com.vibeus.music.repository.ArtistRepository;
 import com.vibeus.music.service.ArtistService;
+import com.vibeus.music.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class ArtistServiceImpl implements ArtistService {
 
     private final ArtistRepository artistRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     @Transactional
@@ -93,6 +97,21 @@ public class ArtistServiceImpl implements ArtistService {
         Artist artist = getActiveArtist(artistId);
         artist.setActive(false);
         artistRepository.save(artist);
+    }
+
+    @Override
+    @Transactional
+    public ArtistResponse uploadArtistImage(UUID artistId, MultipartFile file) {
+        Artist artist = getActiveArtist(artistId);
+
+        String oldImageUrl = artist.getImageUrl();
+        FileUploadResponse upload = fileStorageService.uploadArtistImage(file);
+        artist.setImageUrl(upload.fileUrl());
+
+        Artist saved = artistRepository.save(artist);
+        fileStorageService.deleteFile(oldImageUrl);
+
+        return mapToResponse(saved);
     }
 
     private Artist getActiveArtist(UUID artistId) {

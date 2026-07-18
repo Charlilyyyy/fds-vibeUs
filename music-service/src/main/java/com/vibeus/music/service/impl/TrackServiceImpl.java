@@ -3,6 +3,7 @@ package com.vibeus.music.service.impl;
 import com.vibeus.music.dto.request.CreateTrackRequest;
 import com.vibeus.music.dto.request.UpdateTrackRequest;
 import com.vibeus.music.dto.response.ArtistSummaryResponse;
+import com.vibeus.music.dto.response.FileUploadResponse;
 import com.vibeus.music.dto.response.GenreSummaryResponse;
 import com.vibeus.music.dto.response.PageResponse;
 import com.vibeus.music.dto.response.TrackResponse;
@@ -16,11 +17,13 @@ import com.vibeus.music.repository.AlbumRepository;
 import com.vibeus.music.repository.ArtistRepository;
 import com.vibeus.music.repository.GenreRepository;
 import com.vibeus.music.repository.TrackRepository;
+import com.vibeus.music.service.FileStorageService;
 import com.vibeus.music.service.TrackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +39,7 @@ public class TrackServiceImpl implements TrackService {
     private final ArtistRepository artistRepository;
     private final AlbumRepository albumRepository;
     private final GenreRepository genreRepository;
+    private final FileStorageService fileStorageService;
 
     @Override
     public TrackResponse createTrack(CreateTrackRequest request) {
@@ -151,6 +155,34 @@ public class TrackServiceImpl implements TrackService {
         Track track = getActiveTrack(trackId);
         track.setActive(false);
         trackRepository.save(track);
+    }
+
+    @Override
+    public TrackResponse uploadTrackAudio(UUID trackId, MultipartFile file) {
+        Track track = getActiveTrack(trackId);
+
+        String oldAudioUrl = track.getAudioUrl();
+        FileUploadResponse upload = fileStorageService.uploadTrackAudio(file);
+        track.setAudioUrl(upload.fileUrl());
+
+        Track saved = trackRepository.save(track);
+        fileStorageService.deleteFile(oldAudioUrl);
+
+        return mapToResponse(saved);
+    }
+
+    @Override
+    public TrackResponse uploadTrackCover(UUID trackId, MultipartFile file) {
+        Track track = getActiveTrack(trackId);
+
+        String oldCoverUrl = track.getCoverImageUrl();
+        FileUploadResponse upload = fileStorageService.uploadTrackCover(file);
+        track.setCoverImageUrl(upload.fileUrl());
+
+        Track saved = trackRepository.save(track);
+        fileStorageService.deleteFile(oldCoverUrl);
+
+        return mapToResponse(saved);
     }
 
     private Track getActiveTrack(UUID trackId) {

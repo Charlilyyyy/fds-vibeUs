@@ -5,6 +5,7 @@ import com.vibeus.music.dto.request.UpdateTrackRequest;
 import com.vibeus.music.dto.response.PageResponse;
 import com.vibeus.music.dto.response.TrackResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -25,4 +26,8 @@ public interface TrackService {
     TrackResponse updateTrack(UUID trackId, UpdateTrackRequest request);
 
     void deleteTrack(UUID trackId);
+
+    TrackResponse uploadTrackAudio(UUID trackId, MultipartFile file);
+
+    TrackResponse uploadTrackCover(UUID trackId, MultipartFile file);
 }

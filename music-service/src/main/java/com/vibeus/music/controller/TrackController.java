@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -91,5 +92,27 @@ public class TrackController {
         trackService.deleteTrack(trackId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{trackId}/audio")
+    public ResponseEntity<ApiResponse<TrackResponse>> uploadTrackAudio(
+            @PathVariable UUID trackId,
+            @RequestParam("file") MultipartFile file) {
+
+        TrackResponse response = trackService.uploadTrackAudio(trackId, file);
+
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(),
+                "Track audio uploaded successfully", response));
+    }
+
+    @PostMapping("/{trackId}/cover")
+    public ResponseEntity<ApiResponse<TrackResponse>> uploadTrackCover(
+            @PathVariable UUID trackId,
+            @RequestParam("file") MultipartFile file) {
+
+        TrackResponse response = trackService.uploadTrackCover(trackId, file);
+
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(),
+                "Track cover uploaded successfully", response));
     }
 }
