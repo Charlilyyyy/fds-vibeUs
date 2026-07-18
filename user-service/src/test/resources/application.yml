@@ -12,3 +12,13 @@ spring:
 
   kafka:
     bootstrap-servers: localhost:9092
+    consumer:
+      group-id: user-service-test
+      auto-offset-reset: earliest
+    listener:
+      auto-startup: false
+    admin:
+      fail-fast: false
+      properties:
+        request.timeout.ms: 500
+        default.api.timeout.ms: 1000
