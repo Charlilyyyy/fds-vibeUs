@@ -11,8 +11,6 @@ management:
       exposure:
         include: health,info
 
-# Routes and JWT filter will be added when wire-up begins.
-# Target URIs (local):
-#   auth-service  -> http://localhost:8082
-#   user-service  -> http://localhost:8083
-#   music-service -> http://localhost:8084
+jwt:
+  # Must match the auth-service secret exactly (min 32 characters for HS256).
+  secret: ${JWT_SECRET:vibeus-local-dev-jwt-secret-change-me-32chars}
