@@ -4,15 +4,18 @@ import com.vibeus.user.dto.request.CreateUserProfileRequest;
 import com.vibeus.user.dto.request.UpdateUserProfileRequest;
 import com.vibeus.user.dto.response.UserResponse;
 import com.vibeus.user.entity.User;
+import com.vibeus.user.event.UserRegisteredEvent;
 import com.vibeus.user.exception.DuplicateResourceException;
 import com.vibeus.user.exception.ResourceNotFoundException;
 import com.vibeus.user.mapper.UserMapper;
+import com.vibeus.user.messaging.UserEventProducer;
 import com.vibeus.user.repository.UserRepository;
 import com.vibeus.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -21,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserEventProducer userEventProducer;
 
     @Override
     @Transactional
@@ -46,6 +50,13 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        userEventProducer.publishUserRegistered(new UserRegisteredEvent(
+                savedUser.getId(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                Instant.now()
+        ));
 
         return userMapper.toResponse(savedUser);
     }
